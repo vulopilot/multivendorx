@@ -8,6 +8,7 @@
 namespace MultiVendorX\StoreReview;
 
 use MultiVendorX\Store\Store;
+use MultiVendorX\Store\StoreUtil;
 use MultiVendorX\StoreReview\Util;
 use MultiVendorX\Utill;
 
@@ -451,6 +452,15 @@ class Rest extends \WP_REST_Controller {
                 );
             }
 
+            // Only the store's owner/staff (or a site admin) may reply to or moderate this review.
+            if ( ! StoreUtil::current_user_can_manage_store( $review['store_id'] ?? 0 ) ) {
+                return new \WP_Error(
+                    'rest_forbidden',
+                    __( 'You are not allowed to manage this review.', 'multivendorx' ),
+                    array( 'status' => 403 )
+                );
+            }
+
             // Fields that can be updated.
             $reply  = $request->get_param( 'reply' );
             $status = $request->get_param( 'status' );
@@ -557,6 +567,15 @@ class Rest extends \WP_REST_Controller {
                     'not_found',
                     __( 'Review not found', 'multivendorx' ),
                     array( 'status' => 404 )
+                );
+            }
+
+            // Only the store's owner/staff (or a site admin) may delete this review.
+            if ( ! StoreUtil::current_user_can_manage_store( $review['store_id'] ?? 0 ) ) {
+                return new \WP_Error(
+                    'rest_forbidden',
+                    __( 'You are not allowed to manage this review.', 'multivendorx' ),
+                    array( 'status' => 403 )
                 );
             }
 
